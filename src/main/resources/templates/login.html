@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+        
+        .github-login-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            padding: 1rem;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .github-login-button:hover {
+            background-color: #000;
+        }
+        
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: hsl(var(--text-light));
+        }
+        
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .login-divider span {
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${param.error}" class="alert alert-danger">
+            Authentication failed: Invalid credentials
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+            You have been logged out
+        </div>
+        
+        <!-- Login Card -->
+        <div class="card login-container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Login to AutoTrack</h1>
+            
+            <a th:href="@{/oauth2/authorization/github}" class="github-login-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                Login with GitHub
+            </a>
+            
+            <div class="login-divider">
+                <span>AutoTrack uses GitHub for authentication</span>
+            </div>
+            
+            <div style="text-align: center;">
+                <p>AutoTrack integrates with GitHub to track your commits and tasks.</p>
+                <p>We only request read access to your basic profile information.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

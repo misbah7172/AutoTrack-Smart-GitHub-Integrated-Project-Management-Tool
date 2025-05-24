@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTrack - Automated Task Tracking through GitHub Commits</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="card" style="text-align: center; padding: 3rem 1rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Welcome to AutoTrack</h1>
+            <p style="font-size: 1.25rem; margin-bottom: 2rem;">Automated task tracking through GitHub commit messages with Kanban-style project management</p>
+            
+            <div sec:authorize="isAnonymous()" style="margin-top: 2rem;">
+                <a th:href="@{/login}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github" style="margin-right: 0.5rem;"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    Login with GitHub
+                </a>
+            </div>
+            
+            <div sec:authorize="isAuthenticated()" style="margin-top: 2rem;">
+                <a th:href="@{/dashboard}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home" style="margin-right: 0.5rem;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Go to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Key Features</h2>
+            </div>
+            <div class="card-body" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-git-commit"><circle cx="12" cy="12" r="4"></circle><line x1="1.05" y1="12" x2="7" y2="12"></line><line x1="17.01" y1="12" x2="22.96" y2="12"></line></svg>
+                        Commit-Based Task Tracking
+                    </h3>
+                    <p>Automatically create and update tasks based on your commit messages. Simply follow a specific format and AutoTrack will do the rest.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trello"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="9"></rect><rect x="14" y="7" width="3" height="5"></rect></svg>
+                        Kanban Board
+                    </h3>
+                    <p>Visualize your project progress with a Kanban board that automatically updates as tasks move through different stages.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Team Collaboration
+                    </h3>
+                    <p>Create teams, assign tasks, and track progress together. Perfect for collaborative projects.</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        Tagging and Milestones
+                    </h3>
+                    <p>Organize tasks with tags and group them into milestones for better project management.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- How It Works Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">How It Works</h2>
+            </div>
+            <div class="card-body">
+                <ol style="list-style-position: inside; padding-left: 0;">
+                    <li style="margin-bottom: 1rem;">
+                        <strong>Connect Your GitHub Repository</strong> - Link your GitHub repo to AutoTrack through OAuth.
+                    </li>
+                    <li style="margin-bottom: 1rem;">
+                        <strong>Format Your Commit Messages</strong> - Use the special format:
+                        <pre style="background: #f5f5f5; padding: 0.5rem; border-radius: 0.25rem; margin: 0.5rem 0;">Feature01 : Create login page -> Mahi -> todo</pre>
+                    </li>
+                    <li style="margin-bottom: 1rem;">
+                        <strong>AutoTrack Does the Rest</strong> - Tasks are automatically created and updated based on your commits.
+                    </li>
+                    <li>
+                        <strong>Visualize and Manage</strong> - Use the Kanban board to get a clear overview of your project's progress.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Team - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+        }
+        
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        
+        .user-name {
+            flex: 1;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <!-- Create Team Form -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Create New Team</h1>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/teams/create}" th:object="${teamDTO}" method="post">
+                    <!-- Team Name -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">Team Name</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+                    
+                    <!-- Team Members -->
+                    <div class="form-group">
+                        <label class="form-label">Team Members</label>
+                        <p class="form-text text-muted">Select users to add to your team. You will automatically be added as a team lead.</p>
+                        <div class="user-list">
+                            <div th:each="user : ${allUsers}" class="user-item">
+                                <input type="checkbox" th:field="*{memberIds}" th:value="${user.id}" th:id="'user-' + ${user.id}">
+                                <img th:src="${user.avatarUrl}" alt="User Avatar" class="user-avatar">
+                                <label th:for="'user-' + ${user.id}" class="user-name" th:text="${user.nickname}">Username</label>
+                                <span th:if="${user.hasRole('TEAM_LEAD')}" class="badge badge-primary">Lead</span>
+                            </div>
+                        </div>
+                        <div class="text-danger" th:if="${#fields.hasErrors('memberIds')}" th:errors="*{memberIds}"></div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">Create Team</button>
+                        <a th:href="@{/teams}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

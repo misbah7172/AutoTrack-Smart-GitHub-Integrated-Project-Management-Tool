@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${project.name + ' - AutoTrack'}">Project - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <!-- Project Details -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title" th:text="${project.name}">Project Name</h1>
+                <div>
+                    <a th:href="@{/tasks/project/{id}(id=${project.id})}" class="btn btn-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trello"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="9"></rect><rect x="14" y="7" width="3" height="5"></rect></svg>
+                        Kanban Board
+                    </a>
+                    <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                       th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        Edit Project
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                    <!-- Project Information -->
+                    <div style="flex: 2; min-width: 300px;">
+                        <h3>Project Information</h3>
+                        <table class="table">
+                            <tr>
+                                <th>Name:</th>
+                                <td th:text="${project.name}">Project Name</td>
+                            </tr>
+                            <tr>
+                                <th>GitHub Repository:</th>
+                                <td>
+                                    <a th:href="${project.gitHubRepoUrl}" target="_blank" th:text="${project.gitHubRepoUrl}">
+                                        Repository URL
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Team:</th>
+                                <td>
+                                    <a th:href="@{/teams/{id}(id=${project.team.id})}" th:text="${project.team.name}">
+                                        Team Name
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Created:</th>
+                                <td th:text="${#temporals.format(project.createdAt, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+                            </tr>
+                            <tr>
+                                <th>Last Updated:</th>
+                                <td th:text="${#temporals.format(project.updatedAt, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Project Statistics -->
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3>Project Statistics</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="background-color: hsl(var(--light)); padding: 1rem; border-radius: 0.5rem;">
+                                <h4>Tasks</h4>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                    <div>
+                                        <span style="font-size: 1.5rem; font-weight: bold;" th:text="${project.tasks.size()}">0</span>
+                                        <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">Total</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 1.5rem; font-weight: bold;" 
+                                              th:text="${project.tasks.?[status.name() == 'TODO'].size()}">0</span>
+                                        <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">To Do</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 1.5rem; font-weight: bold;" 
+                                              th:text="${project.tasks.?[status.name() == 'IN_PROGRESS'].size()}">0</span>
+                                        <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">In Progress</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 1.5rem; font-weight: bold;" 
+                                              th:text="${project.tasks.?[status.name() == 'DONE'].size()}">0</span>
+                                        <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">Done</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="background-color: hsl(var(--light)); padding: 1rem; border-radius: 0.5rem;">
+                                <h4>Commits</h4>
+                                <div style="margin-top: 0.5rem;">
+                                    <span style="font-size: 1.5rem; font-weight: bold;" th:text="${project.commits.size()}">0</span>
+                                    <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">Total Commits</span>
+                                </div>
+                            </div>
+                            
+                            <div style="background-color: hsl(var(--light)); padding: 1rem; border-radius: 0.5rem;">
+                                <h4>Team Members</h4>
+                                <div style="margin-top: 0.5rem;">
+                                    <span style="font-size: 1.5rem; font-weight: bold;" th:text="${project.team.members.size()}">0</span>
+                                    <span style="display: block; font-size: 0.875rem; color: hsl(var(--text-light));">Contributors</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Webhook Information -->
+                <div th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" style="margin-top: 2rem;">
+                    <h3>GitHub Webhook Setup</h3>
+                    <p>To enable automatic task tracking from your GitHub commits, set up a webhook with these details:</p>
+                    <table class="table">
+                        <tr>
+                            <th>Payload URL:</th>
+                            <td th:text="${'https://' + #httpServletRequest.serverName + '/webhook/github'}">
+                                https://your-domain.com/webhook/github
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Content Type:</th>
+                            <td>application/json</td>
+                        </tr>
+                        <tr>
+                            <th>Secret:</th>
+                            <td th:text="${project.webhookSecret}">secret</td>
+                        </tr>
+                        <tr>
+                            <th>Events:</th>
+                            <td>Just the push event</td>
+                        </tr>
+                    </table>
+                    <p>
+                        <strong>Note:</strong> Set up the webhook in your GitHub repository settings under "Webhooks".
+                    </p>
+                </div>
+                
+                <!-- Recent Tasks -->
+                <div style="margin-top: 2rem;">
+                    <h3>Recent Tasks</h3>
+                    <div th:if="${#lists.isEmpty(project.tasks)}" class="empty-state">
+                        <p>No tasks created yet for this project.</p>
+                        <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                           th:href="@{/tasks/create(projectId=${project.id})}" class="btn btn-primary">Create Task</a>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(project.tasks)}" class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Feature Code</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Assignee</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="task : ${project.tasks}">
+                                    <td th:text="${task.featureCode}">Feature01</td>
+                                    <td><a th:href="@{/tasks/{id}(id=${task.id})}" th:text="${task.title}">Task Title</a></td>
+                                    <td>
+                                        <span th:if="${task.status.name() == 'TODO'}" class="badge badge-primary" th:text="${task.status}">TODO</span>
+                                        <span th:if="${task.status.name() == 'IN_PROGRESS'}" class="badge badge-warning" th:text="${task.status}">IN_PROGRESS</span>
+                                        <span th:if="${task.status.name() == 'DONE'}" class="badge badge-success" th:text="${task.status}">DONE</span>
+                                    </td>
+                                    <td th:text="${task.assignee != null ? task.assignee.nickname : 'Unassigned'}">User</td>
+                                    <td th:text="${#temporals.format(task.updatedAt, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+                                    <td>
+                                        <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-secondary">View</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Recent Commits -->
+                <div style="margin-top: 2rem;">
+                    <h3>Recent Commits</h3>
+                    <div th:if="${#lists.isEmpty(project.commits)}" class="empty-state">
+                        <p>No commits received yet for this project.</p>
+                        <p>Make sure you have set up the GitHub webhook properly.</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(project.commits)}" class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Commit</th>
+                                    <th>Message</th>
+                                    <th>Author</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="commit : ${project.commits}">
+                                    <td>
+                                        <a th:if="${commit.gitHubUrl != null}" th:href="${commit.gitHubUrl}" target="_blank" 
+                                           th:text="${#strings.substring(commit.sha, 0, 7)}">abcd123</a>
+                                        <span th:unless="${commit.gitHubUrl != null}" th:text="${#strings.substring(commit.sha, 0, 7)}">abcd123</span>
+                                    </td>
+                                    <td th:text="${commit.message}">Commit message</td>
+                                    <td th:text="${commit.authorName}">Author Name</td>
+                                    <td th:text="${#temporals.format(commit.committedAt, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Danger Zone -->
+                <div th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                     style="margin-top: 3rem; border: 1px solid hsl(var(--danger)); border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: hsl(var(--danger));">Danger Zone</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p><strong>Delete this project</strong></p>
+                            <p>Once you delete a project, there is no going back. Please be certain.</p>
+                        </div>
+                        <form th:action="@{/projects/{id}/delete(id=${project.id})}" method="post" 
+                              onsubmit="return confirm('Are you sure you want to delete this project? This action cannot be undone.');">
+                            <button type="submit" class="btn btn-danger">Delete Project</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+🏗️ AutoTrack – Complete Software Blueprint
+⚙️ Tech Stack (on Replit)
+
+    Java (Spring Boot) – Backend APIs
+
+    Thymeleaf (or React if you want SPA) – Frontend UI
+
+    MySQL or PostgreSQL – Database
+
+    GitHub API – Task commit tracking
+
+    Webhooks – Auto-update on GitHub commit
+
+    OAuth2 – GitHub login integration
+
+🧠 AI Prompt Flow for Replit AI
+
+Each prompt will guide Replit AI to generate each major part of your software. You can enter these one by one and modify based on preferences.
+🧩 1. Initialize Spring Boot Project
+
+Prompt:
+
+Create a Spring Boot Java project named `AutoTrack`. It should include modules for:
+- User authentication (GitHub OAuth)
+- Project and team management
+- Task management (Kanban style)
+- Commit parsing from GitHub
+
+Add dependencies: Spring Web, Spring Security, Spring Data JPA, Thymeleaf, OAuth2 client, MySQL.
+
+🧍 2. User Model & GitHub OAuth2 Login
+
+Prompt:
+
+Create a `User` entity with fields: id, nickname, email, GitHubId, avatarUrl.
+
+Implement GitHub OAuth2 login and register the user on first login. Show a dashboard after login.
+
+🧑‍🤝‍🧑 3. Team & Project Models
+
+Prompt:
+
+Create:
+- `Team` entity with fields: id, name, members (List<User>), project (Project)
+- `Project` entity with: id, name, GitHubRepoUrl, GitHubRepoId, GitHubAccessToken, team (Team)
+
+Add forms to create a team and link a GitHub repo. When team lead enters a repo URL, validate it and link to AutoTrack.
+
+🗂️ 4. Task Model & Kanban System
+
+Prompt:
+
+Create a `Task` entity with:
+- id, featureCode (e.g., Feature01), title, status (TODO, IN_PROGRESS, DONE), assignee (User), tag list, commit history (List of commits), project (Project)
+
+Create Thymeleaf page to show Kanban board with these statuses.
+
+🔌 5. GitHub Webhook Integration
+
+Prompt:
+
+Create webhook endpoint `/webhook/github` to receive push event JSON from GitHub. Secure with secret.
+
+Parse commit messages from payload using this logic:
+- "FeatureXX : taskTitle -> nickname -> todo" → create task in TODO
+- "FeatureXX : taskTitle -> nickname" → move to IN_PROGRESS
+- "FeatureXX : taskTitle -> nickname -> Done" → move to DONE
+
+Link tasks to assignee using nickname.
+
+🧠 6. Commit Parser Logic
+
+Prompt:
+
+Implement a `CommitParser` service that uses RegEx to extract:
+- Feature code (e.g., Feature01)
+- Task title
+- Assigned nickname
+- Optional status (todo / Done)
+
+Handle variations like:
+- "Feature01 : auth page -> Mahi -> todo"
+- "[F01] login added -> Rakib"
+
+🔁 7. Task Timeline per Feature
+
+Prompt:
+
+For each task, create a detail view showing:
+- All commits linked to this task
+- Author and timestamp of each commit
+- Status progression (timeline)
+
+Style using Thymeleaf + Bootstrap.
+
+🔒 8. Access Control
+
+Prompt:
+
+Add Spring Security roles:
+- TEAM_LEAD: can assign tasks via commits
+- MEMBER: can only update their tasks
+
+Restrict pages and actions based on role.
+
+🎯 9. Milestone & Tag Support
+
+Prompt:
+
+Update `Task` to support:
+- Milestone field (string)
+- Tags (comma-separated list or separate entity)
+
+Allow GitHub-style tags in commit messages, e.g., "#frontend #critical".
+
+Parse these and display them on the Kanban card.
+
+🔔 10. Notifications (Observer Pattern)
+
+Prompt:
+
+Implement observer pattern:
+- When a task status changes, notify assignee and team lead (email or UI alerts).
+Create `Notification` model with: id, userId, taskId, message, isRead.
+
+🔄 11. Auto GitHub Issue Creation (Optional)
+
+Prompt:
+
+When a task is created via commit, use GitHub API to auto-create an issue in linked repo with title and description.
+
+Store issue URL in Task model.
+
+🧪 12. Test Everything
+
+Prompt:
+
+Write unit tests for:
+- Commit parsing
+- Webhook handling
+- Task status transitions
+- Role-based access
+
+Use Spring Boot Test + Mockito
+
+🎨 Bonus UI Design
+
+If you use Thymeleaf:
+
+Design responsive Thymeleaf pages for:
+- Login via GitHub
+- Dashboard with team list
+- Kanban board (TODO, IN PROGRESS, DONE)
+- Task detail with timeline and commits
+- Create/edit team, project, task
+
+Or if you're using React:
+
+Generate a React frontend with:
+- Login via GitHub (OAuth2)
+- Team management view
+- Project Kanban board
+- Commit timeline view per task
+- Task tagging and milestone management
+Use Axios to call Spring Boot backend APIs.

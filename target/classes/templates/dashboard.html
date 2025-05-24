@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <!-- Welcome Section -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Welcome, <span th:text="${user.nickname}">User</span>!</h1>
+            </div>
+            <div class="card-body">
+                <p>Welcome to AutoTrack, your platform for automated task tracking through GitHub commit messages.</p>
+            </div>
+        </div>
+        
+        <!-- Teams Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Your Teams</h2>
+                <a th:href="@{/teams/create}" class="btn btn-primary">Create Team</a>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(teams)}" class="empty-state">
+                    <p>You are not a member of any teams yet.</p>
+                    <a th:href="@{/teams/create}" class="btn btn-primary">Create Your First Team</a>
+                </div>
+                <div th:unless="${#lists.isEmpty(teams)}" class="team-list">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Members</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="team : ${teams}">
+                                    <td><a th:href="@{/teams/{id}(id=${team.id})}" th:text="${team.name}">Team Name</a></td>
+                                    <td th:text="${team.members.size()}">0</td>
+                                    <td>
+                                        <a th:href="@{/teams/{id}(id=${team.id})}" class="btn btn-secondary">View</a>
+                                        <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                                           th:href="@{/teams/{id}/edit(id=${team.id})}" class="btn btn-primary">Edit</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Projects Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Your Projects</h2>
+                <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                   th:href="@{/projects/create}" class="btn btn-primary">Create Project</a>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(projects)}" class="empty-state">
+                    <p>You don't have any projects yet.</p>
+                    <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                       th:href="@{/projects/create}" class="btn btn-primary">Create Your First Project</a>
+                </div>
+                <div th:unless="${#lists.isEmpty(projects)}" class="project-list">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Project Name</th>
+                                    <th>Team</th>
+                                    <th>GitHub Repository</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="project : ${projects}">
+                                    <td><a th:href="@{/projects/{id}(id=${project.id})}" th:text="${project.name}">Project Name</a></td>
+                                    <td th:text="${project.team.name}">Team Name</td>
+                                    <td>
+                                        <a th:href="${project.gitHubRepoUrl}" target="_blank" th:text="${#strings.abbreviate(project.gitHubRepoUrl, 30)}">
+                                            Repository URL
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-secondary">View</a>
+                                        <a th:href="@{/tasks/project/{id}(id=${project.id})}" class="btn btn-success">Kanban Board</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Your Tasks Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Your Assigned Tasks</h2>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(user.assignedTasks)}" class="empty-state">
+                    <p>You don't have any assigned tasks yet.</p>
+                </div>
+                <div th:unless="${#lists.isEmpty(user.assignedTasks)}" class="task-list">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Feature Code</th>
+                                    <th>Task Title</th>
+                                    <th>Project</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="task : ${user.assignedTasks}">
+                                    <td th:text="${task.featureCode}">Feature01</td>
+                                    <td><a th:href="@{/tasks/{id}(id=${task.id})}" th:text="${task.title}">Task Title</a></td>
+                                    <td th:text="${task.project.name}">Project Name</td>
+                                    <td>
+                                        <span th:if="${task.status.name() == 'TODO'}" class="badge badge-primary" th:text="${task.status}">TODO</span>
+                                        <span th:if="${task.status.name() == 'IN_PROGRESS'}" class="badge badge-warning" th:text="${task.status}">IN_PROGRESS</span>
+                                        <span th:if="${task.status.name() == 'DONE'}" class="badge badge-success" th:text="${task.status}">DONE</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-secondary">View</a>
+                                        <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn btn-primary">Edit</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

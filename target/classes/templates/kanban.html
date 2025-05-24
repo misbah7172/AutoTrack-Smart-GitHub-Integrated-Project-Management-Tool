@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${'Kanban Board - ' + project.name}">Kanban Board - Project</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <!-- Project Info -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title" th:text="${project.name + ' - Kanban Board'}">Project - Kanban Board</h1>
+                <div>
+                    <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        Project Details
+                    </a>
+                    <a th:if="${#authorization.expression('hasAuthority(''TEAM_LEAD'')')}" 
+                       th:href="@{/tasks/create(projectId=${project.id})}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Task
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <!-- TODO Column -->
+            <div class="kanban-column" data-status="TODO">
+                <div class="kanban-column-header">
+                    <h3>TO DO</h3>
+                    <span class="badge badge-primary" th:text="${todoTasks.size()}">0</span>
+                </div>
+                <div class="kanban-column-body">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(todoTasks)}" class="kanban-empty">
+                        <p>No tasks in this column</p>
+                    </div>
+                    
+                    <!-- Task Cards -->
+                    <div th:each="task : ${todoTasks}" class="kanban-card" draggable="true" th:data-task-id="${task.id}">
+                        <div class="kanban-card-feature" th:text="${task.featureCode}">Feature01</div>
+                        <div class="kanban-card-title" th:text="${task.title}">Task Title</div>
+                        
+                        <!-- Task Tags -->
+                        <div class="kanban-card-tags" th:if="${!task.tags.isEmpty()}">
+                            <span th:each="tag : ${task.tags}" class="kanban-card-tag" th:text="${tag}">tag</span>
+                        </div>
+                        
+                        <!-- Task Milestone -->
+                        <div th:if="${task.milestone != null && !task.milestone.isEmpty()}" class="kanban-card-milestone">
+                            <small>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-flag"><path d="M4 15s1-1 4-1 5 1 8 1 4-1 4-1V3s-1 1-4 1-5-1-8-1-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                                <span th:text="${task.milestone}">Milestone</span>
+                            </small>
+                        </div>
+                        
+                        <!-- Task Assignee -->
+                        <div class="kanban-card-assignee" th:if="${task.assignee != null}">
+                            <img th:src="${task.assignee.avatarUrl}" alt="Assignee Avatar">
+                            <span th:text="${task.assignee.nickname}">Assignee</span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="kanban-card-actions" style="margin-top: 10px;">
+                            <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">View</a>
+                            <button class="btn btn-success status-btn" 
+                                    th:data-task-id="${task.id}" 
+                                    data-status="IN_PROGRESS" 
+                                    style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
+                                Start
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- IN_PROGRESS Column -->
+            <div class="kanban-column" data-status="IN_PROGRESS">
+                <div class="kanban-column-header">
+                    <h3>IN PROGRESS</h3>
+                    <span class="badge badge-warning" th:text="${inProgressTasks.size()}">0</span>
+                </div>
+                <div class="kanban-column-body">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(inProgressTasks)}" class="kanban-empty">
+                        <p>No tasks in this column</p>
+                    </div>
+                    
+                    <!-- Task Cards -->
+                    <div th:each="task : ${inProgressTasks}" class="kanban-card" draggable="true" th:data-task-id="${task.id}">
+                        <div class="kanban-card-feature" th:text="${task.featureCode}">Feature01</div>
+                        <div class="kanban-card-title" th:text="${task.title}">Task Title</div>
+                        
+                        <!-- Task Tags -->
+                        <div class="kanban-card-tags" th:if="${!task.tags.isEmpty()}">
+                            <span th:each="tag : ${task.tags}" class="kanban-card-tag" th:text="${tag}">tag</span>
+                        </div>
+                        
+                        <!-- Task Milestone -->
+                        <div th:if="${task.milestone != null && !task.milestone.isEmpty()}" class="kanban-card-milestone">
+                            <small>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-flag"><path d="M4 15s1-1 4-1 5 1 8 1 4-1 4-1V3s-1 1-4 1-5-1-8-1-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                                <span th:text="${task.milestone}">Milestone</span>
+                            </small>
+                        </div>
+                        
+                        <!-- Task Assignee -->
+                        <div class="kanban-card-assignee" th:if="${task.assignee != null}">
+                            <img th:src="${task.assignee.avatarUrl}" alt="Assignee Avatar">
+                            <span th:text="${task.assignee.nickname}">Assignee</span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="kanban-card-actions" style="margin-top: 10px;">
+                            <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">View</a>
+                            <button class="btn btn-success status-btn" 
+                                    th:data-task-id="${task.id}" 
+                                    data-status="DONE" 
+                                    style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
+                                Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DONE Column -->
+            <div class="kanban-column" data-status="DONE">
+                <div class="kanban-column-header">
+                    <h3>DONE</h3>
+                    <span class="badge badge-success" th:text="${doneTasks.size()}">0</span>
+                </div>
+                <div class="kanban-column-body">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(doneTasks)}" class="kanban-empty">
+                        <p>No tasks in this column</p>
+                    </div>
+                    
+                    <!-- Task Cards -->
+                    <div th:each="task : ${doneTasks}" class="kanban-card" draggable="true" th:data-task-id="${task.id}">
+                        <div class="kanban-card-feature" th:text="${task.featureCode}">Feature01</div>
+                        <div class="kanban-card-title" th:text="${task.title}">Task Title</div>
+                        
+                        <!-- Task Tags -->
+                        <div class="kanban-card-tags" th:if="${!task.tags.isEmpty()}">
+                            <span th:each="tag : ${task.tags}" class="kanban-card-tag" th:text="${tag}">tag</span>
+                        </div>
+                        
+                        <!-- Task Milestone -->
+                        <div th:if="${task.milestone != null && !task.milestone.isEmpty()}" class="kanban-card-milestone">
+                            <small>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-flag"><path d="M4 15s1-1 4-1 5 1 8 1 4-1 4-1V3s-1 1-4 1-5-1-8-1-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                                <span th:text="${task.milestone}">Milestone</span>
+                            </small>
+                        </div>
+                        
+                        <!-- Task Assignee -->
+                        <div class="kanban-card-assignee" th:if="${task.assignee != null}">
+                            <img th:src="${task.assignee.avatarUrl}" alt="Assignee Avatar">
+                            <span th:text="${task.assignee.nickname}">Assignee</span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="kanban-card-actions" style="margin-top: 10px;">
+                            <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">View</a>
+                            <button class="btn btn-primary status-btn" 
+                                    th:data-task-id="${task.id}" 
+                                    data-status="IN_PROGRESS" 
+                                    style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
+                                Reopen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- JavaScript -->
+    <script th:src="@{/js/kanban.js}"></script>
+</body>
+</html>

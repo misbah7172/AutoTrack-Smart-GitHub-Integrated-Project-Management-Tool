@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container">
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        
+        <!-- Create Project Form -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Create New Project</h1>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/projects/create}" th:object="${projectDTO}" method="post">
+                    <!-- Project Name -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">Project Name</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                        <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+                    
+                    <!-- GitHub Repository URL -->
+                    <div class="form-group">
+                        <label for="gitHubRepoUrl" class="form-label">GitHub Repository URL</label>
+                        <input type="text" id="gitHubRepoUrl" th:field="*{gitHubRepoUrl}" class="form-control" 
+                               placeholder="https://github.com/username/repository" required>
+                        <small class="form-text text-muted">
+                            Enter the full URL to your GitHub repository (e.g., https://github.com/username/repository)
+                        </small>
+                        <div class="text-danger" th:if="${#fields.hasErrors('gitHubRepoUrl')}" th:errors="*{gitHubRepoUrl}"></div>
+                    </div>
+                    
+                    <!-- GitHub Repository ID (Optional) -->
+                    <div class="form-group">
+                        <label for="gitHubRepoId" class="form-label">GitHub Repository ID (Optional)</label>
+                        <input type="text" id="gitHubRepoId" th:field="*{gitHubRepoId}" class="form-control">
+                        <small class="form-text text-muted">
+                            If you know your GitHub repository ID, you can enter it here. Otherwise, leave it blank.
+                        </small>
+                    </div>
+                    
+                    <!-- GitHub Access Token (Optional) -->
+                    <div class="form-group">
+                        <label for="gitHubAccessToken" class="form-label">GitHub Access Token (Optional)</label>
+                        <input type="text" id="gitHubAccessToken" th:field="*{gitHubAccessToken}" class="form-control">
+                        <small class="form-text text-muted">
+                            If you want to enable GitHub issue creation, provide a GitHub personal access token with 'repo' scope.
+                        </small>
+                    </div>
+                    
+                    <!-- Team Selection -->
+                    <div class="form-group">
+                        <label for="teamId" class="form-label">Team</label>
+                        <select id="teamId" th:field="*{teamId}" class="form-control" required>
+                            <option value="">-- Select a Team --</option>
+                            <option th:each="team : ${teams}" th:value="${team.id}" th:text="${team.name}">Team Name</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('teamId')}" th:errors="*{teamId}"></div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">Create Project</button>
+                        <a th:href="@{/projects}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>
