@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 /**
  * Configuration class for Spring Security.
@@ -27,11 +30,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
+        
         return http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/error", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        .requestMatchers("/webhook/github").permitAll() // Allow GitHub webhook without authentication
+                        .requestMatchers(mvcMatcherBuilder.pattern("/")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/login")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/error")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/css/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/js/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/images/**")).permitAll()
+                        .requestMatchers(mvcMatcherBuilder.pattern("/webjars/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/webhook/github")).permitAll() // Using AntPathRequestMatcher for non-MVC patterns
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll() // H2 Console access
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -49,8 +61,12 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/webhook/github") // Disable CSRF for webhooks
+                        .ignoringRequestMatchers(
+                            new AntPathRequestMatcher("/webhook/github"),
+                            new AntPathRequestMatcher("/h2-console/**")
+                        )
                 )
+                .headers(headers -> headers.frameOptions().disable()) // Required for H2 console
                 .build();
     }
 }
