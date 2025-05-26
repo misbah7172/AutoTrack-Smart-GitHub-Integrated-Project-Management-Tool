@@ -1,88 +1,85 @@
 # AutoTrack
 
-AutoTrack is a smart GitHub-integrated project collaboration and task tracking tool. It automatically tracks your team's tasks directly from Git commit messages—no manual updates, no extra tools. Perfect for fast-paced development teams who want automated, real-time insights into their workflow.
+**AutoTrack** is a smart GitHub-integrated project collaboration and task tracking tool. It automates your workflow by extracting and tracking tasks from Git commit messages—no need for manual task updates. Ideal for development teams that want to focus on code and let the system handle tracking.
+
+---
 
 ## Features
 
-- **GitHub Integration**: Automatically link GitHub repositories.
-- **Team Management**: Create teams, assign members with nicknames.
-- **Task Parsing from Commits**:
-  - Commit example: `Feature01 : Login Page -> Misbah -> todo`
-  - AutoTrack extracts task data from commits.
-- **Automated Kanban Workflow**:
-  - Tasks move from **TODO → IN PROGRESS → DONE** based on commits.
-- **Real-time Sync**: See updates as they happen.
-- **Activity Timeline**: Track progress, changes, and user activity.
-- **Notifications**: Get notified when a task progresses or is completed.
-- **Metrics Dashboard**: Visual reports for team performance.
-
-## How It Works
-
-1. **Create Repo**: Team lead creates a GitHub repo.
-2. **Connect AutoTrack**: Repo is connected to AutoTrack.
-3. **Add Team**: Team members are invited with email & nicknames.
-4. **Assign Tasks via Commits**:
-   ```bash
-   git commit -m "Feature01 : Login Page -> Misbah -> todo"
-5. Track Progress:
-
-Any new commit on that feature = “In Progress”
-
-A commit ending with -> done = marked “Done”
-
-
-
-
-Commit Syntax Rules
-
-Format	Meaning
-
-Feature01 : Page -> Name -> todo	Adds task to TODO list
-Feature01 : Page -> Name	Moves to IN PROGRESS
-Feature01 : Page -> Name -> done	Marks as DONE
-
-
-> Example: Feature03 : Backend API -> Misbah -> todo
-
-
-
-Tech Stack
-
-Frontend: JavaFX (for desktop) or Spring Boot + Thymeleaf (for web)
-
-Backend: Java, Spring Boot
-
-Database: MySQL / PostgreSQL
-
-Integration: GitHub API
-
-
-Team Setup
-
-Each member has a nickname (used in commits)
-
-Members commit from their own devices
-
-AutoTrack continuously monitors GitHub activity
-
-
-Installation
-
-> (Coming soon: setup instructions for desktop/web deployment)
-
-
-
-Contribution
-
-Feel free to fork this repo and contribute. PRs welcome!
-
-License
-
-MIT License
-
+- **GitHub Integration**: Automatically connects to repositories.
+- **Team Management**: Add team members by email with nicknames.
+- **Commit-Based Task Management**:
+  - Commit format:
+    ```
+    Feature01 : Login Page -> Misbah -> todo
+    ```
+  - AutoTrack parses and creates tasks from commits.
+- **Kanban Board**:
+  - Automatically updates task status:
+    - `-> todo`: Task added to **TODO**
+    - Commit without status: Task moved to **IN PROGRESS**
+    - `-> done`: Task moved to **DONE**
+- **Real-Time Updates**: Tracks commits and changes instantly.
+- **Notifications**: Team gets notified of task progress.
+- **Activity Log**: View full history of commits per feature/user.
+- **Dashboard**: Visualize task status and team performance.
 
 ---
 
-AutoTrack – Write code. Commit. Track automatically.
+## Workflow
+
+1. **Team Lead** creates a GitHub repo.
+2. **Connect AutoTrack** to the repo.
+3. **Add team members** using email and assign nicknames.
+4. **Assign tasks** via commit messages:
+    ```bash
+    git commit -m "Feature01 : Login Page -> Misbah -> todo"
+    ```
+5. AutoTrack parses and updates the Kanban board automatically based on further commits.
 
 ---
+
+## Commit Syntax Rules
+
+| Format                                       | Description             |
+|---------------------------------------------|-------------------------|
+| `Feature01 : Task -> Misbah -> todo`        | Create TODO task        |
+| `Feature01 : Task -> Misbah`                | Move to IN PROGRESS     |
+| `Feature01 : Task -> Misbah -> done`        | Move to DONE            |
+
+**Example:**
+```bash
+git commit -m "Feature03 : Backend API integration -> Misbah -> todo"
+```
+
+---
+
+## Technology Stack
+
+- **Frontend**: JavaFX (Desktop) / Spring Boot + Thymeleaf (Web)
+- **Backend**: Java, Spring Boot
+- **Database**: MySQL / PostgreSQL
+- **Integration**: GitHub REST API
+
+---
+
+## Getting Started
+
+> Setup instructions and deployment steps coming soon...
+
+---
+
+## Contribution
+
+Contributions are welcome!  
+Fork the repository, make your changes, and submit a pull request.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
+
+---
+
+**AutoTrack** – _Write code. Commit. Track automatically._
