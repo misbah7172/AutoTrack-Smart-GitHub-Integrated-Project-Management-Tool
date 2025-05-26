@@ -24,3 +24,65 @@ AutoTrack is a smart GitHub-integrated project collaboration and task tracking t
 4. **Assign Tasks via Commits**:
    ```bash
    git commit -m "Feature01 : Login Page -> Misbah -> todo"
+5. Track Progress:
+
+Any new commit on that feature = “In Progress”
+
+A commit ending with -> done = marked “Done”
+
+
+
+
+Commit Syntax Rules
+
+Format	Meaning
+
+Feature01 : Page -> Name -> todo	Adds task to TODO list
+Feature01 : Page -> Name	Moves to IN PROGRESS
+Feature01 : Page -> Name -> done	Marks as DONE
+
+
+> Example: Feature03 : Backend API -> Misbah -> todo
+
+
+
+Tech Stack
+
+Frontend: JavaFX (for desktop) or Spring Boot + Thymeleaf (for web)
+
+Backend: Java, Spring Boot
+
+Database: MySQL / PostgreSQL
+
+Integration: GitHub API
+
+
+Team Setup
+
+Each member has a nickname (used in commits)
+
+Members commit from their own devices
+
+AutoTrack continuously monitors GitHub activity
+
+
+Installation
+
+> (Coming soon: setup instructions for desktop/web deployment)
+
+
+
+Contribution
+
+Feel free to fork this repo and contribute. PRs welcome!
+
+License
+
+MIT License
+
+
+---
+
+AutoTrack – Write code. Commit. Track automatically.
+
+---
