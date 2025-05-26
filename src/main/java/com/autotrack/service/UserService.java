@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -93,18 +94,35 @@ public class UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2U
         User user = userRepository.findByGitHubId(gitHubId)
                 .orElseGet(() -> createUser(gitHubId, nickname, email, avatarUrl));
         
-        // Update user information
-        user.setNickname(nickname);
-        if (email != null) {
-            user.setEmail(email);
+        // Update user information only if it's a new user or data has changed
+        boolean needsUpdate = false;
+        if (!nickname.equals(user.getNickname())) {
+            user.setNickname(nickname);
+            needsUpdate = true;
         }
-        user.setAvatarUrl(avatarUrl);
-        userRepository.save(user);
+        if (email != null && !email.equals(user.getEmail())) {
+            user.setEmail(email);
+            needsUpdate = true;
+        }
+        if (avatarUrl != null && !avatarUrl.equals(user.getAvatarUrl())) {
+            user.setAvatarUrl(avatarUrl);
+            needsUpdate = true;
+        }
         
-        // Create authorities
-        Collection<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.name()))
-                .collect(Collectors.toList());
+        if (needsUpdate) {
+            userRepository.save(user);
+        }
+        
+        // Create authorities from user roles
+        Collection<GrantedAuthority> authorities;
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            authorities = user.getRoles().stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                    .collect(Collectors.toList());
+        } else {
+            // Default authority for users without specific roles
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_MEMBER"));
+        }
         
         // Return OAuth2User with user authorities
         return new DefaultOAuth2User(
@@ -119,13 +137,20 @@ public class UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2U
      */
     @Transactional
     public User createUser(String gitHubId, String nickname, String email, String avatarUrl) {
-        User user = User.builder()
-                .gitHubId(gitHubId)
-                .nickname(nickname)
-                .email(email)
-                .avatarUrl(avatarUrl)
-                .roles(Collections.singletonList(Role.MEMBER))
-                .build();
+        User user = new User();
+        user.setGitHubId(gitHubId);
+        user.setNickname(nickname);
+        user.setEmail(email);
+        user.setAvatarUrl(avatarUrl);
+        
+        // Initialize roles as a mutable list
+        List<Role> roles = new ArrayList<>();
+        roles.add(Role.MEMBER);
+        user.setRoles(roles);
+        
+        // Set timestamps
+        user.setCreatedAt(java.time.LocalDateTime.now());
+        user.setUpdatedAt(java.time.LocalDateTime.now());
         
         return userRepository.save(user);
     }
@@ -145,6 +170,53 @@ public class UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2U
      */
     public User getCurrentUser(OAuth2User principal) {
         String gitHubId = principal.getAttribute("id").toString();
-        return getUserByGitHubId(gitHubId);
+        String nickname = principal.getAttribute("login").toString();
+        String email = (String) principal.getAttribute("email");
+        String avatarUrl = (String) principal.getAttribute("avatar_url");
+        
+        // Find or create user if not exists
+        return userRepository.findByGitHubId(gitHubId)
+                .orElseGet(() -> createUser(gitHubId, nickname, email, avatarUrl));
+    }
+
+    /**
+     * Find or create user by GitHub username for team invitations.
+     */
+    @Transactional
+    public User findOrCreateUserByGitHub(String githubUsername, String commitUsername, String email, boolean isTeamLead) {
+        User existingUser = userRepository.findByNickname(commitUsername).orElse(null);
+        if (existingUser != null) {
+            return existingUser;
+        }
+        
+        User user = new User();
+        user.setGitHubId("pending_" + githubUsername);
+        user.setNickname(commitUsername);
+        user.setEmail(email);
+        user.setAvatarUrl("https://github.com/" + githubUsername + ".png");
+        
+        List<Role> roles = new ArrayList<>();
+        if (isTeamLead) {
+            roles.add(Role.TEAM_LEAD);
+        } else {
+            roles.add(Role.MEMBER);
+        }
+        user.setRoles(roles);
+        
+        user.setCreatedAt(java.time.LocalDateTime.now());
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+        
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update user's nickname for commit tracking.
+     */
+    @Transactional
+    public void updateUserNickname(Long userId, String newNickname) {
+        User user = getUserById(userId);
+        user.setNickname(newNickname);
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
     }
 }

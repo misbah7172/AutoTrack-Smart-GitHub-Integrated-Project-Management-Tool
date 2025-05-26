@@ -159,4 +159,77 @@ public class TeamController {
         }
         return "redirect:/teams";
     }
+
+    /**
+     * Show team members management page.
+     */
+    @GetMapping("/{id}/members")
+    public String showMembers(@PathVariable Long id, Model model) {
+        Team team = teamService.getTeamById(id);
+        model.addAttribute("team", team);
+        return "team/members";
+    }
+
+    /**
+     * Add member to team by GitHub username.
+     */
+    @PostMapping("/{id}/members/add")
+    public String addMember(@PathVariable Long id, 
+                           @RequestParam String githubUsername,
+                           @RequestParam String commitUsername,
+                           @RequestParam(required = false) String userEmail,
+                           @RequestParam(required = false) boolean isTeamLead,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            Team team = teamService.getTeamById(id);
+            User newMember = userService.findOrCreateUserByGitHub(githubUsername, commitUsername, userEmail, isTeamLead);
+            teamService.addMemberToTeam(team, newMember);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Member " + commitUsername + " added successfully!");
+            return "redirect:/teams/" + id + "/members";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Error adding member: " + e.getMessage());
+            return "redirect:/teams/" + id + "/members";
+        }
+    }
+
+    /**
+     * Remove member from team.
+     */
+    @PostMapping("/members/{memberId}/remove")
+    public String removeMember(@PathVariable Long memberId, 
+                              @RequestParam Long teamId,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            Team team = teamService.getTeamById(teamId);
+            User member = userService.getUserById(memberId);
+            teamService.removeMemberFromTeam(team, member);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Member removed successfully!");
+            return "redirect:/teams/" + teamId + "/members";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Error removing member: " + e.getMessage());
+            return "redirect:/teams/" + teamId + "/members";
+        }
+    }
+
+    /**
+     * Update member's commit tracking username.
+     */
+    @PostMapping("/members/{memberId}/username")
+    @ResponseBody
+    public String updateMemberUsername(@PathVariable Long memberId, 
+                                     @RequestBody java.util.Map<String, String> request) {
+        try {
+            String newUsername = request.get("username");
+            userService.updateUserNickname(memberId, newUsername);
+            return "success";
+        } catch (Exception e) {
+            return "error: " + e.getMessage();
+        }
+    }
 }

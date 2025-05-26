@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AutoTrack</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img th:src="${user.avatarUrl}" th:alt="${user.nickname}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjNmNGY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iMzciIHI9IjE4IiBmaWxsPSIjOWNhM2FmIi8+CjxwYXRoIGQ9Im0yMyA3NGMwLTE1IDEyLTI3IDI3LTI3czI3IDEyIDI3IDI3djEwaC01NHoiIGZpbGw9IiM5Y2EzYWYiLz4KPC9zdmc+'" />
+                <div class="profile-status">
+                    <span class="status-dot online"></span>
+                    <span>Online</span>
+                </div>
+            </div>
+            
+            <div class="profile-info">
+                <h1 th:text="${user.nickname}">Nickname</h1>
+                <p class="profile-email" th:text="${user.email}">user@example.com</p>
+                <p class="profile-github">
+                    <i data-feather="github"></i>
+                    <a th:href="'https://github.com/' + ${user.nickname}" target="_blank" th:text="'@' + ${user.nickname}">@username</a>
+                </p>
+                <div class="profile-roles">
+                    <span th:each="role : ${user.roles}" 
+                          th:class="${role.name() == 'TEAM_LEAD' ? 'role-badge team-lead' : 'role-badge member'}" 
+                          th:text="${role.name() == 'TEAM_LEAD' ? 'Team Lead' : 'Member'}">
+                        Role
+                    </span>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="btn btn-secondary" onclick="editProfile()">
+                    <i data-feather="edit-2"></i>
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 th:text="${teamCount}">0</h3>
+                        <p>Teams</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="folder"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 th:text="${projectCount}">0</h3>
+                        <p>Projects</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="check-square"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 th:text="${taskCount}">0</h3>
+                        <p>Tasks Assigned</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="git-commit"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 th:text="${commitCount}">0</h3>
+                        <p>Commits Tracked</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-sections">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>
+                            <i data-feather="users"></i>
+                            My Teams
+                        </h3>
+                        <a th:href="@{/teams}" class="btn btn-outline btn-sm">View All</a>
+                    </div>
+                    <div class="teams-list">
+                        <div th:if="${teams.empty}" class="empty-state">
+                            <p>You're not part of any teams yet.</p>
+                            <a th:href="@{/teams/create}" class="btn btn-secondary">Create Team</a>
+                        </div>
+                        <div th:each="team : ${teams}" class="team-item">
+                            <div class="team-info">
+                                <h4 th:text="${team.name}">Team Name</h4>
+                                <p th:text="${#lists.size(team.members)} + ' members'">0 members</p>
+                            </div>
+                            <a th:href="@{/teams/{id}(id=${team.id})}" class="btn btn-outline btn-sm">View</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>
+                            <i data-feather="folder"></i>
+                            Recent Projects
+                        </h3>
+                        <a th:href="@{/projects}" class="btn btn-outline btn-sm">View All</a>
+                    </div>
+                    <div class="projects-list">
+                        <div th:if="${projects.empty}" class="empty-state">
+                            <p>No projects found.</p>
+                            <a th:href="@{/projects/create}" class="btn btn-secondary">Create Project</a>
+                        </div>
+                        <div th:each="project : ${projects}" class="project-item">
+                            <div class="project-info">
+                                <h4 th:text="${project.name}">Project Name</h4>
+                                <p th:text="${project.team.name}">Team Name</p>
+                                <div class="commit-tracking-info">
+                                    <i data-feather="git-branch"></i>
+                                    <span>Auto-tracking commits</span>
+                                </div>
+                            </div>
+                            <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-outline btn-sm">View</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>
+                            <i data-feather="activity"></i>
+                            AutoTrack Settings
+                        </h3>
+                    </div>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Commit Message Format</h4>
+                                <p>How your commits should be formatted for automatic task tracking</p>
+                                <code>"Feature01 : task description -> YourNickname -> status"</code>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Your Username in Commits</h4>
+                                <p>Use this exact username in commit messages: <strong th:text="${user.nickname}">nickname</strong></p>
+                                <small>Example: "Feature01 : login page -> <span th:text="${user.nickname}">nickname</span> -> todo"</small>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Task Status Keywords</h4>
+                                <p>Use these status keywords in commits:</p>
+                                <div class="status-keywords">
+                                    <span class="keyword todo">todo</span>
+                                    <span class="keyword progress">in-progress (no arrow)</span>
+                                    <span class="keyword done">done</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        feather.replace();
+        
+        function editProfile() {
+            alert('Profile editing feature coming soon!');
+        }
+    </script>
+</body>
+</html>

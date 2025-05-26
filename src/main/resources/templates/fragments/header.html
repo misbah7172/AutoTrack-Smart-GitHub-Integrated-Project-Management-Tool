@@ -34,8 +34,8 @@
                 <!-- User Profile Section -->
                 <div class="user-profile" sec:authorize="isAuthenticated()">
                     <a th:href="@{/profile}" class="user-info">
-                        <img class="avatar" sec:authentication="principal.attributes.avatar_url" alt="User Avatar">
-                        <span sec:authentication="principal.attributes.login">Username</span>
+                        <img class="avatar" sec:authentication="name" alt="User Avatar" style="display: none;">
+                        <span sec:authentication="name">Username</span>
                     </a>
                     <form th:action="@{/logout}" method="post">
                         <button type="submit" class="btn btn-secondary">

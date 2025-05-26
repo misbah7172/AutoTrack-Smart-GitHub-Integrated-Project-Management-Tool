@@ -117,4 +117,24 @@ public class TeamService {
         
         teamRepository.delete(team);
     }
+
+    /**
+     * Add member to team.
+     */
+    @Transactional
+    public void addMemberToTeam(Team team, User member) {
+        if (!team.getMembers().contains(member)) {
+            team.getMembers().add(member);
+            teamRepository.save(team);
+        }
+    }
+
+    /**
+     * Remove member from team.
+     */
+    @Transactional
+    public void removeMemberFromTeam(Team team, User member) {
+        team.getMembers().remove(member);
+        teamRepository.save(team);
+    }
 }

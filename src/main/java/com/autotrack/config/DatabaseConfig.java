@@ -8,7 +8,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 /**
- * Database configuration to handle NeonDB PostgreSQL connection
+ * Database configuration for H2 in-memory database
  */
 @Configuration
 public class DatabaseConfig {
@@ -17,10 +17,10 @@ public class DatabaseConfig {
     @Primary
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://ep-sparkling-boat-a5ggt16d.us-east-2.aws.neon.tech/neondb");
-        dataSource.setUsername("neondb_owner");
-        dataSource.setPassword("npg_JchmopKk8Xr7");
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:autotrack;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("");
         
         return dataSource;
     }

@@ -45,6 +45,7 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private List<Role> roles = new ArrayList<>();
     
     @ManyToMany(mappedBy = "members")

@@ -53,7 +53,7 @@ public class ProjectController {
      * Show project creation form.
      */
     @GetMapping("/create")
-    @PreAuthorize("hasAuthority('TEAM_LEAD')")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') or hasAuthority('ROLE_TEAM_LEAD')")
     public String showCreateForm(Model model, @AuthenticationPrincipal OAuth2User principal) {
         User user = userService.getCurrentUser(principal);
         List<Team> teams = teamService.getTeamsByUser(user);
@@ -67,7 +67,7 @@ public class ProjectController {
      * Process project creation.
      */
     @PostMapping("/create")
-    @PreAuthorize("hasAuthority('TEAM_LEAD')")
+    @PreAuthorize("hasAuthority('ROLE_MEMBER') or hasAuthority('ROLE_TEAM_LEAD')")
     public String createProject(@Valid @ModelAttribute("projectDTO") ProjectDTO projectDTO,
                                 BindingResult result,
                                 @AuthenticationPrincipal OAuth2User principal,

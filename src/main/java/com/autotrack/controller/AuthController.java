@@ -20,14 +20,5 @@ public class AuthController {
         return "login";
     }
 
-    /**
-     * User profile endpoint.
-     */
-    @GetMapping("/profile")
-    public String profile(@AuthenticationPrincipal OAuth2User principal, Model model) {
-        model.addAttribute("name", principal.getAttribute("name"));
-        model.addAttribute("email", principal.getAttribute("email"));
-        model.addAttribute("avatar", principal.getAttribute("avatar_url"));
-        return "profile";
-    }
+
 }
